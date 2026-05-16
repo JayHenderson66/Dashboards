@@ -227,10 +227,9 @@ async function loadPadres() {
     ]);
 
     const events = sched.events || [];
-    const now = new Date();
-    const recent = events.filter(e => new Date(e.date) < now).slice(-3).reverse();
-    const upcoming = events.filter(e => new Date(e.date) >= now).slice(0, 3);
-    const live = events.find(e => e.status?.type?.state === 'in');
+    const recent = events.filter(e => isCompleted(e)).slice(-3).reverse();
+    const upcoming = events.filter(e => isUpcoming(e)).slice(0, 3);
+    const live = events.find(e => isLiveGame(e));
 
     // Record from standings
     const teamData = sched.team;
@@ -548,19 +547,29 @@ function renderStandings(entries, myTeamId, label) {
 function getOpponent(comp, teamId) {
   if (!comp) return 'TBD';
   const opp = comp.competitors?.find(c => Number(c.id) !== teamId);
-  return opp?.team?.shortDisplayName || opp?.team?.displayName || 'TBD';
+  return opp?.team?.shortDisplayName || opp?.team?.displayName || opp?.team?.abbreviation || opp?.team?.abbr || 'TBD';
 }
 function isHome(comp, teamId) {
   const t = comp?.competitors?.find(c => Number(c.id) === teamId);
   return t?.homeAway === 'home';
 }
+function isCompleted(event) {
+  const comp = event.competitions?.[0];
+  return comp?.status?.type?.completed === true || event.status?.type?.state === 'post';
+}
+function isLiveGame(event) {
+  return event.status?.type?.state === 'in';
+}
+function isUpcoming(event) {
+  return !isCompleted(event) && !isLiveGame(event);
+}
 function didWin(comp, teamId) {
   const t = comp?.competitors?.find(c => Number(c.id) === teamId);
-  return t?.winner === true;
+  return t?.winner === true || t?.winner === 'true';
 }
 function parseScore(s) {
   if (s === null || s === undefined) return "0";
-  if (typeof s === "object") return String(s.value ?? s.displayValue ?? 0);
+  if (typeof s === "object") return String(s.displayValue ?? s.value ?? 0);
   return String(s);
 }
 function getHomeScore(comp) {
@@ -635,9 +644,8 @@ async function loadOrioles() {
       fetchJSON(`${ESPN}/baseball/mlb/teams/1/news?limit=5`)
     ]);
     const events = sched.events || [];
-    const now = new Date();
-    const recent = events.filter(e => new Date(e.date) < now).slice(-3).reverse();
-    const upcoming = events.filter(e => new Date(e.date) >= now).slice(0, 3);
+    const recent = events.filter(e => isCompleted(e)).slice(-3).reverse();
+    const upcoming = events.filter(e => isUpcoming(e)).slice(0, 3);
 
     let html = `
       <div class="stat-row">
