@@ -654,8 +654,42 @@ async function loadRavens() {
   }
 }
 
+// ── AUTO-REFRESH ─────────────────────────────────────────────
+let autoRefreshTimer = null;
+
+async function checkForLiveGames() {
+  try {
+    const [mlb, nba] = await Promise.all([
+      fetchJSON(`${ESPN}/baseball/mlb/scoreboard`),
+      fetchJSON(`${ESPN}/basketball/nba/scoreboard`)
+    ]);
+    const allEvents = [...(mlb.events || []), ...(nba.events || [])];
+    const myTeamIds = ["25","1","12","24","33"];
+    return allEvents.some(e =>
+      e.status?.type?.state === "in" &&
+      e.competitions?.[0]?.competitors?.some(c => myTeamIds.includes(c.id))
+    );
+  } catch { return false; }
+}
+
+async function scheduleAutoRefresh() {
+  if (autoRefreshTimer) clearTimeout(autoRefreshTimer);
+  const isLive = await checkForLiveGames();
+  const label = document.getElementById("last-updated");
+  if (isLive) {
+    label.textContent = label.textContent.replace(" · LIVE ●", "") + " · LIVE ●";
+    autoRefreshTimer = setTimeout(async () => {
+      await refreshAll();
+      scheduleAutoRefresh();
+    }, 60000); // refresh every 60 seconds during live games
+  } else {
+    label.textContent = label.textContent.replace(" · LIVE ●", "");
+    autoRefreshTimer = setTimeout(scheduleAutoRefresh, 300000); // check every 5 min otherwise
+  }
+}
+
 // ── INIT ─────────────────────────────────────────────────────
-refreshAll();
+refreshAll().then(scheduleAutoRefresh);
 </script>
 </body>
 </html>
