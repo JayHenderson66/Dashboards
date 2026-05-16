@@ -118,6 +118,17 @@
   .spin { animation: spin 1s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
+
+  /* STANDINGS */
+  .standings-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 1.5rem; }
+  .standings-table th { font-family: "DM Mono", monospace; font-size: 10px; color: var(--muted); font-weight: 400; text-transform: uppercase; letter-spacing: 0.06em; padding: 6px 10px; text-align: right; border-bottom: 1px solid var(--border); }
+  .standings-table th:first-child { text-align: left; }
+  .standings-table td { padding: 8px 10px; text-align: right; color: var(--text); border-bottom: 1px solid var(--border); }
+  .standings-table td:first-child { text-align: left; font-weight: 500; }
+  .standings-table tr.my-team td { color: var(--accent); background: rgba(245,166,35,0.05); }
+  .standings-table tr:last-child td { border-bottom: none; }
+  .standings-rank { color: var(--muted); font-family: "DM Mono", monospace; font-size: 11px; margin-right: 6px; }
+
   /* MOBILE */
   @media (max-width: 600px) {
     header, .content { padding-left: 1rem; padding-right: 1rem; }
@@ -229,7 +240,7 @@ async function loadPadres() {
     let html = `
       <div class="stat-row">
         <div class="stat-card"><div class="stat-label">Record</div><div class="stat-value">${wins}–${losses}</div><div class="stat-sub">2026 MLB season</div></div>
-        <div class="stat-card"><div class="stat-label">NL West</div><div class="stat-value">2nd</div><div class="stat-sub">1 GB of LAD</div></div>
+        <div class="stat-card" id="padres-division-rank"><div class="stat-label">NL West</div><div class="stat-value">2nd</div><div class="stat-sub">Loading...</div></div>
         ${live ? `<div class="stat-card"><div class="stat-label">Live now</div><div class="stat-value highlight">${getScore(live)}</div><div class="stat-sub">${getInning(live)}</div></div>` : ''}
         <div class="stat-card"><div class="stat-label">Next series</div><div class="stat-value" style="font-size:16px;">vs LAD</div><div class="stat-sub">Mon 5/18 · Home</div></div>
       </div>`;
@@ -300,7 +311,10 @@ async function loadClippers() {
         <div class="playoffs-label">2026 NBA Playoffs · West — in progress</div>
         <div class="playoffs-line"><strong>SAS leads MIN 3–2</strong> · West Semis (live)</div>
         <div class="playoffs-line">OKC def. LAL 4–0 · West Finals: OKC vs SAS/MIN</div>
-      </div>
+      </div>`;
+    const clippersStandings = await fetchStandings('basketball', 'nba', 12);
+    html += renderStandings(clippersStandings, 12, 'NBA Pacific Division Standings');
+    html += `
       <div class="section-label">Latest news</div><div class="news">`;
     (news.articles || []).slice(0, 5).forEach(a => {
       html += newsItem(a.links?.web?.href || 'https://www.espn.com/nba/team/_/name/lac', '#C8102E', a.headline, `ESPN · ${fmtDate(a.published)}`);
@@ -465,6 +479,71 @@ function fallbackSdsuBb() {
   </div>`;
 }
 
+
+// ── STANDINGS ─────────────────────────────────────────────────
+async function fetchStandings(sport, league, teamId) {
+  try {
+    const data = await fetchJSON(`${ESPN}/${sport}/${league}/standings`);
+    // Find the division containing our team
+    const groups = data.children || data.standings?.entries || [];
+    
+    // ESPN standings structure varies - try to find division groups
+    let divisionEntries = null;
+    
+    function findDivision(node) {
+      if (node.standings?.entries) {
+        const hasTeam = node.standings.entries.some(e => 
+          String(e.team?.id) === String(teamId)
+        );
+        if (hasTeam) { divisionEntries = node.standings.entries; return true; }
+      }
+      if (node.children) {
+        for (const child of node.children) { if (findDivision(child)) return true; }
+      }
+      return false;
+    }
+    
+    if (data.children) { for (const c of data.children) findDivision(c); }
+    if (!divisionEntries && data.standings?.entries) divisionEntries = data.standings.entries;
+    
+    return divisionEntries;
+  } catch(e) { return null; }
+}
+
+function renderStandings(entries, myTeamId, label) {
+  if (!entries || !entries.length) return '';
+  
+  function getStat(entry, names) {
+    for (const n of names) {
+      const s = entry.stats?.find(x => x.name === n || x.shortDisplayName === n);
+      if (s) return s.displayValue ?? s.value ?? '-';
+    }
+    return '-';
+  }
+  
+  let html = `<div class="section-label">${label}</div>
+  <table class="standings-table">
+    <thead><tr>
+      <th>Team</th><th>W</th><th>L</th><th>PCT</th><th>GB</th>
+    </tr></thead><tbody>`;
+  
+  entries.forEach((entry, i) => {
+    const isMyTeam = String(entry.team?.id) === String(myTeamId);
+    const name = entry.team?.shortDisplayName || entry.team?.displayName || '?';
+    const w = getStat(entry, ['wins','W','w']);
+    const l = getStat(entry, ['losses','L','l']);
+    const pct = getStat(entry, ['winPercent','PCT','pct','winPct']);
+    const gb = getStat(entry, ['gamesBehind','GB','gb']);
+    html += `<tr class="${isMyTeam ? 'my-team' : ''}">
+      <td><span class="standings-rank">${i+1}</span>${name}</td>
+      <td>${w}</td><td>${l}</td><td>${typeof pct === 'number' ? pct.toFixed(3) : pct}</td><td>${gb}</td>
+    </tr>`;
+  });
+  
+  html += '</tbody></table>';
+  return html;
+}
+
 // ── HELPERS ──────────────────────────────────────────────────
 function getOpponent(comp, teamId) {
   if (!comp) return 'TBD';
@@ -583,6 +662,10 @@ async function loadOrioles() {
       const score = `${getHomeScore(comp)} – ${getAwayScore(comp)}`;
       html += `<div class="game">${badge(won?'W':'L')}<span class="game-date">${fmtDate(e.date)}</span><span class="game-matchup">${ha} ${opp}</span><span class="game-score">${score}</span></div>`;
     });
+    // Fetch and render standings
+    const oriolesStandings = await fetchStandings('baseball', 'mlb', 1);
+    html += renderStandings(oriolesStandings, 1, 'AL East Standings');
+
     html += `</div><div class="section-label">Latest news</div><div class="news">`;
     (news.articles || []).slice(0, 5).forEach(a => {
       html += newsItem(a.links?.web?.href || 'https://www.mlb.com/orioles/news', '#DF4601', a.headline, `ESPN · ${fmtDate(a.published)}`);
