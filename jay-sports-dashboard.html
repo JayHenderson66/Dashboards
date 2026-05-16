@@ -482,11 +482,10 @@ function fallbackSdsuBb() {
 // ── STANDINGS ─────────────────────────────────────────────────
 async function fetchStandings(sport, league, teamId) {
   try {
-    const data = await fetchJSON(`${ESPN}/${sport}/${league}/standings`);
-    // Find the division containing our team
-    const groups = data.children || data.standings?.entries || [];
+    // Use the correct ESPN standings endpoint with groups
+    const url = `https://site.web.api.espn.com/apis/v2/sports/${sport}/${league}/standings?level=3&sort=winpercent:desc,wins:desc,gamesplayed:asc`;
+    const data = await fetchJSON(url);
     
-    // ESPN standings structure varies - try to find division groups
     let divisionEntries = null;
     
     function findDivision(node) {
@@ -503,7 +502,7 @@ async function fetchStandings(sport, league, teamId) {
     }
     
     if (data.children) { for (const c of data.children) findDivision(c); }
-    if (!divisionEntries && data.standings?.entries) divisionEntries = data.standings.entries;
+    else if (data.standings?.entries) divisionEntries = data.standings.entries;
     
     return divisionEntries;
   } catch(e) { return null; }
@@ -667,8 +666,14 @@ async function loadOrioles() {
       const opp = getOpponent(comp, 1);
       const ha = isHome(comp, 1) ? 'vs' : '@';
       const won = didWin(comp, 1);
-      const score = `${getHomeScore(comp)} – ${getAwayScore(comp)}`;
-      html += `<div class="game">${badge(won?'W':'L')}<span class="game-date">${fmtDate(e.date)}</span><span class="game-matchup">${ha} ${opp}</span><span class="game-score">${score}</span></div>`;
+      const myTeam = comp?.competitors?.find(c => Number(c.id) === 1);
+      const oppTeam = comp?.competitors?.find(c => Number(c.id) !== 1);
+      const myAbbr = myTeam?.team?.abbreviation || 'BAL';
+      const oppAbbr = oppTeam?.team?.abbreviation || opp;
+      const myScore = parseScore(myTeam?.score);
+      const oppScore = parseScore(oppTeam?.score);
+      const scoreStr = won ? `${myAbbr} ${myScore}, ${oppAbbr} ${oppScore}` : `${oppAbbr} ${oppScore}, ${myAbbr} ${myScore}`;
+      html += `<div class="game">${badge(won?'W':'L')}<span class="game-date">${fmtDate(e.date)}</span><span class="game-matchup">${ha} ${opp}</span><span class="game-score">${scoreStr}</span></div>`;
     });
     // Fetch and render standings
     const oriolesStandings = await fetchStandings('baseball', 'mlb', 1);
