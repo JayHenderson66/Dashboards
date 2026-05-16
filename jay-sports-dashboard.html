@@ -479,20 +479,25 @@ function didWin(comp, teamId) {
   const t = comp?.competitors?.find(c => Number(c.id) === teamId);
   return t?.winner === true;
 }
+function parseScore(s) {
+  if (s === null || s === undefined) return "0";
+  if (typeof s === "object") return String(s.value ?? s.displayValue ?? 0);
+  return String(s);
+}
 function getHomeScore(comp) {
-  const h = comp?.competitors?.find(c => c.homeAway === 'home');
-  return h?.score || '0';
+  const h = comp?.competitors?.find(c => c.homeAway === "home");
+  return parseScore(h?.score);
 }
 function getAwayScore(comp) {
-  const a = comp?.competitors?.find(c => c.homeAway === 'away');
-  return a?.score || '0';
+  const a = comp?.competitors?.find(c => c.homeAway === "away");
+  return parseScore(a?.score);
 }
 function getScore(event) {
   const comp = event.competitions?.[0];
-  if (!comp) return '—';
-  const home = comp.competitors?.find(c => c.homeAway === 'home');
-  const away = comp.competitors?.find(c => c.homeAway === 'away');
-  return `${away?.team?.abbreviation} ${away?.score || 0} – ${home?.score || 0} ${home?.team?.abbreviation}`;
+  if (!comp) return "-";
+  const home = comp.competitors?.find(c => c.homeAway === "home");
+  const away = comp.competitors?.find(c => c.homeAway === "away");
+  return `${away?.team?.abbreviation} ${parseScore(away?.score)} - ${parseScore(home?.score)} ${home?.team?.abbreviation}`;
 }
 function getInning(event) {
   const status = event.status;
