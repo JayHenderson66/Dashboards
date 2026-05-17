@@ -460,7 +460,7 @@ function DetailView({ team, data }) {
       </div>
 
       {featured && (
-        <div className="card" style={{ marginBottom: 20 }}>
+        <div className="card" style={{ marginBottom: 14 }}>
           <div className="card-header">
             <h3 className="card-title">{live ? "Live Now" : (isCompleted(featured) ? "Most Recent" : "Up Next")}</h3>
             {live && <span className="score-card-status live">LIVE</span>}
@@ -484,7 +484,7 @@ function DetailView({ team, data }) {
         </div>
       </div>
 
-      <div className="card" style={{ marginTop: 20 }}>
+      <div className="card" style={{ marginTop: 14 }}>
         <div className="card-header">
           <h3 className="card-title">News & Stories</h3>
         </div>
