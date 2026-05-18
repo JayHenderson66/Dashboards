@@ -56,7 +56,9 @@ const BASE = "https://site.api.espn.com/apis/site/v2/sports";
 // API
 // ============================================================
 async function fetchJSON(url) {
-  const res = await fetch(url, { cache: "no-store" });
+  // Add a cache-buster so CDN edges don't return stale data on every poll
+  const sep = url.includes("?") ? "&" : "?";
+  const res = await fetch(`${url}${sep}_=${Date.now()}`, { cache: "no-store" });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return res.json();
 }
@@ -78,6 +80,27 @@ async function fetchTeam(t) {
   const articles = newsRes.status === "fulfilled" ? (newsRes.value.articles || []) : [];
 
   return { team, events, articles };
+}
+
+async function fetchScoreboard(leaguePath) {
+  // Scoreboard returns the current day's games with frequently-updated live scores
+  try {
+    const data = await fetchJSON(`${BASE}/${leaguePath}/scoreboard`);
+    return data.events || [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function mergeEventsById(...lists) {
+  // Later lists override earlier ones for the same event id (so scoreboard wins over schedule)
+  const byId = new Map();
+  for (const list of lists) {
+    for (const ev of (list || [])) {
+      if (ev && ev.id) byId.set(ev.id, ev);
+    }
+  }
+  return Array.from(byId.values());
 }
 
 async function fetchStandings(leaguePath) {
@@ -644,10 +667,24 @@ function App() {
     setStatus(prev => prev === "ok" ? "loading" : prev);
     setErrMsg(null);
     try {
+      // Fetch the league-wide scoreboard once per unique league — this is where
+      // live in-game scores update frequently. Then merge into each team's
+      // schedule so live events have the freshest score data.
+      const leaguePaths = Array.from(new Set(TEAMS.map(t => t.leaguePath)));
+      const sbList = await Promise.all(leaguePaths.map(lp => fetchScoreboard(lp)));
+      const sbByLeague = {};
+      leaguePaths.forEach((lp, i) => { sbByLeague[lp] = sbList[i] || []; });
+
       const entries = await Promise.all(
         TEAMS.map(async t => {
           try {
             const d = await fetchTeam(t);
+            // Filter scoreboard events to ones containing this team
+            const teamSbEvents = (sbByLeague[t.leaguePath] || []).filter(ev =>
+              ev?.competitions?.[0]?.competitors?.some(c => String(c.team?.id) === String(t.espnId))
+            );
+            // Scoreboard events override schedule events with the same id
+            d.events = mergeEventsById(d.events, teamSbEvents);
             return [t.id, d];
           } catch (e) {
             return [t.id, null];
