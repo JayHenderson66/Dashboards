@@ -1044,6 +1044,200 @@ button { font-family: inherit; cursor: pointer; }
   color: white;
 }
 
+/* === Baseball situation (bases + outs) === */
+.bb-situation {
+  display: inline-flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 14px;
+  margin: 4px auto 0;
+  background: rgba(0, 0, 0, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 999px;
+  width: fit-content;
+  white-space: nowrap;
+  flex-wrap: nowrap;
+}
+.bb-situation > * { flex-shrink: 0; }
+.matchup + .bb-situation { margin-top: 2px; }
+.matchup-situation-wrap {
+  display: flex;
+  justify-content: center;
+  padding: 2px 0 6px;
+}
+.gs-hero .bb-situation {
+  background: rgba(0, 0, 0, 0.28);
+  border-color: rgba(255, 255, 255, 0.14);
+  margin-top: 10px;
+}
+.score-card .bb-situation { margin-top: 0; margin-bottom: 8px; }
+/* Center the pill across the card */
+.score-card-body > .matchup + .bb-situation,
+.matchup ~ .bb-situation {
+  display: flex;
+  margin-left: auto;
+  margin-right: auto;
+}
+.bb-situation.lg {
+  gap: 20px;
+  padding: 9px 16px;
+}
+
+.bb-diamond {
+  position: relative;
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+}
+.bb-situation.lg .bb-diamond { width: 32px; height: 32px; }
+
+.bb-base {
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  background: transparent;
+  border: 1.5px solid rgba(255, 255, 255, 0.3);
+  transition: background 200ms ease, border-color 200ms ease, box-shadow 200ms ease;
+}
+.bb-situation.lg .bb-base { width: 11px; height: 11px; }
+
+.bb-base.first  { right: 0;   top: 50%; transform: translate(0, -50%) rotate(45deg); }
+.bb-base.second { left: 50%;  top: 0;   transform: translate(-50%, 0) rotate(45deg); }
+.bb-base.third  { left: 0;    top: 50%; transform: translate(0, -50%) rotate(45deg); }
+
+.bb-base.on {
+  background: var(--warn);
+  border-color: var(--warn);
+  box-shadow: 0 0 8px rgba(255, 200, 87, 0.55);
+}
+
+.bb-outs {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.bb-out {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: transparent;
+  border: 1.5px solid rgba(255, 255, 255, 0.3);
+  transition: background 200ms ease, border-color 200ms ease, box-shadow 200ms ease;
+}
+.bb-situation.lg .bb-out { width: 9px; height: 9px; }
+.bb-out.on {
+  background: var(--bad);
+  border-color: var(--bad);
+  box-shadow: 0 0 6px rgba(255, 107, 107, 0.55);
+}
+.bb-outs-label {
+  font-family: "Oswald", sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1.6px;
+  color: var(--ink-3);
+  margin-left: 4px;
+}
+.gs-hero .bb-outs-label,
+.detail-hero .bb-outs-label {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+/* === Football situation (down & distance, possession, red zone) === */
+.fb-situation {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 14px;
+  margin: 4px auto 0;
+  background: rgba(0, 0, 0, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 999px;
+  width: fit-content;
+  max-width: 100%;
+  font-family: "Oswald", sans-serif;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  flex-wrap: nowrap;
+}
+.fb-situation > * { white-space: nowrap; flex-shrink: 0; }
+.matchup + .fb-situation { margin-top: 2px; }
+.gs-hero .fb-situation {
+  background: rgba(0, 0, 0, 0.28);
+  border-color: rgba(255, 255, 255, 0.14);
+  margin-top: 10px;
+}
+.fb-situation.lg { gap: 12px; padding: 8px 16px; }
+
+.fb-poss {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 8px 2px 6px;
+  border-radius: 999px;
+  background: color-mix(in oklch, var(--poss-color) 18%, transparent);
+  border: 1px solid color-mix(in oklch, var(--poss-color) 35%, transparent);
+}
+.fb-poss-dot {
+  width: 8px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--poss-color);
+  /* Football-shape: elliptical with subtle laces accent */
+  box-shadow: 0 0 6px color-mix(in oklch, var(--poss-color) 60%, transparent);
+}
+.fb-poss-abbr {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: color-mix(in oklch, var(--poss-color) 50%, white 50%);
+}
+.fb-dd {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: 1px;
+}
+.fb-situation.lg .fb-dd { font-size: 15px; }
+.fb-spot {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ink-3);
+  padding-left: 8px;
+  border-left: 1px solid rgba(255, 255, 255, 0.12);
+  letter-spacing: 1px;
+}
+.gs-hero .fb-spot,
+.detail-hero .fb-spot {
+  color: rgba(255, 255, 255, 0.78);
+  border-left-color: rgba(255, 255, 255, 0.25);
+}
+.fb-rz {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.4px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--bad);
+  color: white;
+  box-shadow: 0 0 10px rgba(255, 107, 107, 0.45);
+  animation: pulse 1.6s infinite;
+}
+.fb-situation.redzone {
+  border-color: rgba(255, 107, 107, 0.35);
+  background: rgba(255, 107, 107, 0.08);
+}
+
+/* The situation pill in score cards / big matchup should be centered as a block */
+.score-card-body .bb-situation,
+.matchup ~ .bb-situation {
+  display: flex;
+}
+.score-card-body > .bb-situation {
+  margin: 4px auto 8px;
+}
+
 @media (max-width: 640px) {
   .modal-backdrop { padding: 0; }
   .modal { max-height: 100vh; border-radius: 0; }

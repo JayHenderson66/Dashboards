@@ -441,6 +441,78 @@ function ScoreCard({ team, data, onClick }) {
   );
 }
 
+// Renders bases-diamond + outs for a live MLB game. Returns null if the
+// `situation` block isn't present (non-MLB sports or pre/post-game).
+function BaseballSituation({ ev, size = "sm" }) {
+  const situation = ev?.competitions?.[0]?.situation;
+  if (!situation) return null;
+  const { onFirst, onSecond, onThird, outs } = situation;
+  // Bail if we have absolutely no runners or outs info
+  if (onFirst == null && onSecond == null && onThird == null && outs == null) return null;
+  const outCount = Number(outs ?? 0);
+  const runnerLabels = [onFirst && "1st", onSecond && "2nd", onThird && "3rd"].filter(Boolean);
+  const ariaRunners = runnerLabels.length ? `Runners on ${runnerLabels.join(", ")}` : "Bases empty";
+  return (
+    <div className={`bb-situation ${size}`} aria-label={`${ariaRunners}, ${outCount} out${outCount === 1 ? "" : "s"}`}>
+      <div className="bb-diamond" aria-hidden="true">
+        <span className={`bb-base second ${onSecond ? "on" : ""}`} />
+        <span className={`bb-base third ${onThird ? "on" : ""}`} />
+        <span className={`bb-base first ${onFirst ? "on" : ""}`} />
+      </div>
+      <div className="bb-outs" aria-hidden="true">
+        {[0, 1, 2].map(i => (
+          <span key={i} className={`bb-out ${i < outCount ? "on" : ""}`} />
+        ))}
+        <span className="bb-outs-label">{outCount === 1 ? "OUT" : "OUTS"}</span>
+      </div>
+    </div>
+  );
+}
+
+// Renders down & distance + possession + red-zone state for a live football
+// game. Returns null if no useful situation data is present.
+function FootballSituation({ ev, size = "sm" }) {
+  const comp = ev?.competitions?.[0];
+  const situation = comp?.situation;
+  if (!situation) return null;
+  const { shortDownDistanceText, downDistanceText, possessionText, possession, isRedZone } = situation;
+  const dd = shortDownDistanceText || downDistanceText;
+  if (!dd && !possessionText) return null;
+
+  // Find which team has possession (and pull its abbr/color for the indicator)
+  const competitors = comp?.competitors || [];
+  const possC = competitors.find(c => String(c.team?.id) === String(possession));
+  const possAbbr = possC?.team?.abbreviation || possC?.team?.shortDisplayName || "";
+  const possColor = possC?.team?.color ? `#${possC.team.color}` : "var(--warn)";
+
+  return (
+    <div
+      className={`fb-situation ${size} ${isRedZone ? "redzone" : ""}`}
+      style={{ "--poss-color": possColor }}
+      aria-label={`${dd || ""}${possessionText ? `, ball at ${possessionText}` : ""}${isRedZone ? ", red zone" : ""}`}
+    >
+      {possAbbr && (
+        <span className="fb-poss" aria-hidden="true">
+          <span className="fb-poss-dot" />
+          <span className="fb-poss-abbr">{possAbbr}</span>
+        </span>
+      )}
+      {dd && <span className="fb-dd">{dd}</span>}
+      {possessionText && <span className="fb-spot">{possessionText}</span>}
+      {isRedZone && <span className="fb-rz">RED ZONE</span>}
+    </div>
+  );
+}
+
+// Multi-sport dispatcher — keeps the call sites simple.
+function LiveSituation({ ev, team, size = "sm" }) {
+  if (!ev) return null;
+  const sport = team?.leaguePath || "";
+  if (sport.startsWith("baseball")) return <BaseballSituation ev={ev} size={size} />;
+  if (sport.startsWith("football")) return <FootballSituation ev={ev} size={size} />;
+  return null;
+}
+
 function FeaturedGame({ ev, team }) {
   if (!ev) {
     return (
@@ -463,32 +535,39 @@ function FeaturedGame({ ev, team }) {
     const winning = myScore > oppScore;
     const oppTeam = competitorAsTeam(opp);
     return (
-      <div className="matchup">
-        <div className="matchup-side">
-          <Monogram team={team} size="sm" />
-          <div style={{ minWidth: 0 }}>
-            <div className="matchup-name">{team.name}</div>
-            <div className="matchup-score" style={{ color: winning ? "white" : "var(--ink-2)" }}>
-              {myScore}
+      <>
+        <div className="matchup">
+          <div className="matchup-side">
+            <Monogram team={team} size="sm" />
+            <div style={{ minWidth: 0 }}>
+              <div className="matchup-name">{team.name}</div>
+              <div className="matchup-score" style={{ color: winning ? "white" : "var(--ink-2)" }}>
+                {myScore}
+              </div>
             </div>
           </div>
-        </div>
-        <div className="matchup-mid">
-          <div style={{ fontWeight: 700, color: live ? "var(--live)" : "var(--ink-3)" }}>
-            {live ? (status.shortDetail || "LIVE") : "FINAL"}
-          </div>
-          <div style={{ marginTop: 4 }}>{me?.homeAway === "home" ? "vs" : "@"}</div>
-        </div>
-        <div className="matchup-side right">
-          <div style={{ textAlign: "right", minWidth: 0 }}>
-            <div className="matchup-name">{teamShortName(opp)}</div>
-            <div className="matchup-score" style={{ color: !winning ? "white" : "var(--ink-2)" }}>
-              {oppScore}
+          <div className="matchup-mid">
+            <div style={{ fontWeight: 700, color: live ? "var(--live)" : "var(--ink-3)" }}>
+              {live ? (status.shortDetail || "LIVE") : "FINAL"}
             </div>
+            <div style={{ marginTop: 4 }}>{me?.homeAway === "home" ? "vs" : "@"}</div>
           </div>
-          {oppTeam && <Monogram team={oppTeam} size="sm" logoUrl={competitorLogoUrl(opp)} />}
+          <div className="matchup-side right">
+            <div style={{ textAlign: "right", minWidth: 0 }}>
+              <div className="matchup-name">{teamShortName(opp)}</div>
+              <div className="matchup-score" style={{ color: !winning ? "white" : "var(--ink-2)" }}>
+                {oppScore}
+              </div>
+            </div>
+            {oppTeam && <Monogram team={oppTeam} size="sm" logoUrl={competitorLogoUrl(opp)} />}
+          </div>
         </div>
-      </div>
+        {live && (
+          <div className="matchup-situation-wrap">
+            <LiveSituation ev={ev} team={team} size="sm" />
+          </div>
+        )}
+      </>
     );
   }
 
@@ -639,6 +718,7 @@ function BigMatchup({ ev, team }) {
           {oppTeam && <Monogram team={oppTeam} size="lg" logoUrl={competitorLogoUrl(opp)} />}
         </div>
       </div>
+      {live && <LiveSituation ev={ev} team={team} size="lg" />}
       {ev?.competitions?.[0]?.venue?.fullName && (
         <div style={{ fontSize: 11, color: "var(--ink-3)", textAlign: "center", letterSpacing: 0.8, textTransform: "uppercase" }}>
           {ev.competitions[0].venue.fullName}
@@ -857,6 +937,7 @@ function GameStatsHero({ ev, team, summary }) {
           {hT && <Monogram team={hT} size="lg" logoUrl={competitorLogoUrl(homeC)} />}
         </div>
       </div>
+      {live && <LiveSituation ev={ev} team={team} size="lg" />}
       {comp?.venue?.fullName && (
         <div className="gs-venue">{comp.venue.fullName}{comp.venue.address?.city ? ` · ${comp.venue.address.city}${comp.venue.address.state ? `, ${comp.venue.address.state}` : ""}` : ""}</div>
       )}

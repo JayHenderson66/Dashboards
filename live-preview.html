@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Live state preview · The Big Board</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    body { padding: 32px; }
+    .preview-wrap {
+      max-width: 1280px;
+      margin: 0 auto;
+      display: grid;
+      gap: 28px;
+    }
+    .preview-section h2 {
+      font-family: "Oswald", sans-serif;
+      letter-spacing: 1.4px;
+      text-transform: uppercase;
+      font-size: 14px;
+      color: var(--ink-3);
+      margin: 0 0 12px;
+    }
+    .preview-section .label {
+      font-size: 11px;
+      color: var(--ink-3);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media (max-width: 800px) { .row-2 { grid-template-columns: 1fr; } }
+    .back { color: var(--ink-3); font-size: 13px; text-decoration: none; }
+    .back:hover { color: var(--ink); }
+  </style>
+</head>
+<body>
+  <div class="preview-wrap">
+    <div>
+      <a class="back" href="index.html">← Back to The Big Board</a>
+      <h1 style="font-family:'Oswald',sans-serif;letter-spacing:1px;text-transform:uppercase;margin:8px 0 0;">Live game preview</h1>
+      <p style="color:var(--ink-3);font-size:14px;margin:6px 0 0;">What a live NFL or MLB game looks like across the dashboard's three contexts. Data here is mocked.</p>
+    </div>
+
+    <!-- =========================== SCORE CARDS =========================== -->
+    <div class="preview-section">
+      <h2>Score Card · All-teams grid</h2>
+      <div class="row-2">
+
+        <!-- NFL live -->
+        <div class="card score-card" style="--accent:#0080C6">
+          <div class="score-card-stripe"></div>
+          <div class="score-card-body">
+            <div class="score-card-head">
+              <div class="mono lg has-img" style="--mono-bg:#fff;--mono-fg:#FFC20E;"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/24.png" alt="" /></div>
+              <div class="score-card-head-text">
+                <div class="score-card-team-name">Chargers</div>
+                <div class="score-card-league">NFL · AFC West</div>
+              </div>
+              <span class="score-card-status live">LIVE</span>
+            </div>
+            <div class="matchup">
+              <div class="matchup-side">
+                <div class="mono sm has-img" style="--mono-bg:#fff;"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/24.png" alt="" /></div>
+                <div style="min-width:0">
+                  <div class="matchup-name">Chargers</div>
+                  <div class="matchup-score" style="color:white">17</div>
+                </div>
+              </div>
+              <div class="matchup-mid">
+                <div style="font-weight:700;color:var(--live)">3RD &middot; 8:42</div>
+                <div style="margin-top:4px">@</div>
+              </div>
+              <div class="matchup-side right">
+                <div style="text-align:right;min-width:0">
+                  <div class="matchup-name">Chiefs</div>
+                  <div class="matchup-score" style="color:var(--ink-2)">14</div>
+                </div>
+                <div class="mono sm has-img" style="--mono-bg:#fff;"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/12.png" alt="" /></div>
+              </div>
+            </div>
+            <div class="matchup-situation-wrap">
+              <div class="fb-situation redzone" style="--poss-color:#0080C6">
+                <span class="fb-poss"><span class="fb-poss-dot"></span><span class="fb-poss-abbr">LAC</span></span>
+                <span class="fb-dd">3rd &amp; 4</span>
+                <span class="fb-spot">KC 18</span>
+                <span class="fb-rz">RED ZONE</span>
+              </div>
+            </div>
+            <div class="score-card-stats">
+              <div class="stat"><div class="stat-label">Record</div><div class="stat-value">7-3</div></div>
+              <div class="stat"><div class="stat-label">Streak</div><div class="stat-value win">W3</div></div>
+              <div class="stat"><div class="stat-label">Last 5</div>
+                <div class="streak-pips">
+                  <span class="pip W"></span><span class="pip W"></span><span class="pip W"></span><span class="pip L"></span><span class="pip W"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- MLB live -->
+        <div class="card score-card" style="--accent:#2F241D">
+          <div class="score-card-stripe"></div>
+          <div class="score-card-body">
+            <div class="score-card-head">
+              <div class="mono lg has-img" style="--mono-bg:#fff;"><img src="https://a.espncdn.com/i/teamlogos/mlb/500/25.png" alt="" /></div>
+              <div class="score-card-head-text">
+                <div class="score-card-team-name">Padres</div>
+                <div class="score-card-league">MLB · NL West</div>
+              </div>
+              <span class="score-card-status live">LIVE</span>
+            </div>
+            <div class="matchup">
+              <div class="matchup-side">
+                <div class="mono sm has-img" style="--mono-bg:#fff;"><img src="https://a.espncdn.com/i/teamlogos/mlb/500/25.png" alt="" /></div>
+                <div style="min-width:0">
+                  <div class="matchup-name">Padres</div>
+                  <div class="matchup-score" style="color:white">4</div>
+                </div>
+              </div>
+              <div class="matchup-mid">
+                <div style="font-weight:700;color:var(--live)">BOT 7TH</div>
+                <div style="margin-top:4px">vs</div>
+              </div>
+              <div class="matchup-side right">
+                <div style="text-align:right;min-width:0">
+                  <div class="matchup-name">Dodgers</div>
+                  <div class="matchup-score" style="color:var(--ink-2)">3</div>
+                </div>
+                <div class="mono sm has-img" style="--mono-bg:#fff;"><img src="https://a.espncdn.com/i/teamlogos/mlb/500/19.png" alt="" /></div>
+              </div>
+            </div>
+            <div class="matchup-situation-wrap">
+              <div class="bb-situation">
+                <div class="bb-diamond">
+                  <span class="bb-base second on"></span>
+                  <span class="bb-base third"></span>
+                  <span class="bb-base first on"></span>
+                </div>
+                <div class="bb-outs">
+                  <span class="bb-out on"></span>
+                  <span class="bb-out on"></span>
+                  <span class="bb-out"></span>
+                  <span class="bb-outs-label">OUTS</span>
+                </div>
+              </div>
+            </div>
+            <div class="score-card-stats">
+              <div class="stat"><div class="stat-label">Record</div><div class="stat-value">62-48</div></div>
+              <div class="stat"><div class="stat-label">Streak</div><div class="stat-value win">W2</div></div>
+              <div class="stat"><div class="stat-label">Last 5</div>
+                <div class="streak-pips">
+                  <span class="pip W"></span><span class="pip L"></span><span class="pip W"></span><span class="pip W"></span><span class="pip L"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- =========================== DETAIL HERO =========================== -->
+    <div class="preview-section">
+      <h2>Detail view · Live Now card (football)</h2>
+      <div class="card" style="--accent:#0080C6;--accent-2:#FFC20E">
+        <div class="card-header">
+          <h3 class="card-title">Live Now</h3>
+          <div style="display:flex;align-items:center;gap:10px">
+            <span class="score-card-status live">LIVE</span>
+            <span class="stats-hint">View stats →</span>
+          </div>
+        </div>
+        <div style="padding:8px 4px">
+          <div class="matchup" style="padding-bottom:14px">
+            <div class="matchup-side">
+              <div class="mono lg has-img" style="--mono-bg:#fff;"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/24.png" alt="" /></div>
+              <div style="min-width:0">
+                <div class="matchup-name" style="font-size:15px">Chargers</div>
+                <div style="font-size:11px;color:var(--ink-3);margin-top:2px">AWAY</div>
+              </div>
+            </div>
+            <div style="text-align:center">
+              <div class="matchup-score" style="font-size:48px">17<span style="opacity:.4;padding:0 14px;font-size:28px">·</span>14</div>
+              <div style="font-size:11px;color:var(--live);margin-top:6px;letter-spacing:1.2px;text-transform:uppercase;font-weight:700">3rd &middot; 8:42</div>
+            </div>
+            <div class="matchup-side right">
+              <div style="text-align:right;min-width:0">
+                <div class="matchup-name" style="font-size:15px">Chiefs</div>
+                <div style="font-size:11px;color:var(--ink-3);margin-top:2px">HOME</div>
+              </div>
+              <div class="mono lg has-img" style="--mono-bg:#fff;"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/12.png" alt="" /></div>
+            </div>
+          </div>
+          <div style="display:flex;justify-content:center">
+            <div class="fb-situation lg redzone" style="--poss-color:#0080C6">
+              <span class="fb-poss"><span class="fb-poss-dot"></span><span class="fb-poss-abbr">LAC</span></span>
+              <span class="fb-dd">3rd &amp; 4</span>
+              <span class="fb-spot">KC 18</span>
+              <span class="fb-rz">RED ZONE</span>
+            </div>
+          </div>
+          <div style="font-size:11px;color:var(--ink-3);text-align:center;letter-spacing:.8px;text-transform:uppercase;margin-top:10px">GEHA Field at Arrowhead Stadium</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- =========================== Variants =========================== -->
+    <div class="preview-section">
+      <h2>Football pill variants</h2>
+      <div style="display:flex;flex-direction:column;gap:14px;align-items:flex-start;background:var(--panel);padding:20px;border-radius:14px;border:1px solid var(--line);">
+        <div class="label">Normal possession · midfield</div>
+        <div class="fb-situation" style="--poss-color:#0080C6">
+          <span class="fb-poss"><span class="fb-poss-dot"></span><span class="fb-poss-abbr">LAC</span></span>
+          <span class="fb-dd">1st &amp; 10</span>
+          <span class="fb-spot">LAC 35</span>
+        </div>
+
+        <div class="label">Third and long</div>
+        <div class="fb-situation" style="--poss-color:#241773">
+          <span class="fb-poss"><span class="fb-poss-dot"></span><span class="fb-poss-abbr">BAL</span></span>
+          <span class="fb-dd">3rd &amp; 12</span>
+          <span class="fb-spot">BAL 22</span>
+        </div>
+
+        <div class="label">Red zone (pulses)</div>
+        <div class="fb-situation redzone" style="--poss-color:#A6192E">
+          <span class="fb-poss"><span class="fb-poss-dot"></span><span class="fb-poss-abbr">SDSU</span></span>
+          <span class="fb-dd">2nd &amp; goal</span>
+          <span class="fb-spot">OPP 4</span>
+          <span class="fb-rz">RED ZONE</span>
+        </div>
+
+        <div class="label">Large size (used in detail / modal)</div>
+        <div class="fb-situation lg" style="--poss-color:#FFC20E">
+          <span class="fb-poss"><span class="fb-poss-dot"></span><span class="fb-poss-abbr">KC</span></span>
+          <span class="fb-dd">4th &amp; 1</span>
+          <span class="fb-spot">LAC 42</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="preview-section">
+      <h2>Baseball pill variants (for reference)</h2>
+      <div style="display:flex;flex-direction:column;gap:14px;align-items:flex-start;background:var(--panel);padding:20px;border-radius:14px;border:1px solid var(--line);">
+        <div class="label">Bases empty · 0 outs</div>
+        <div class="bb-situation">
+          <div class="bb-diamond">
+            <span class="bb-base second"></span><span class="bb-base third"></span><span class="bb-base first"></span>
+          </div>
+          <div class="bb-outs">
+            <span class="bb-out"></span><span class="bb-out"></span><span class="bb-out"></span>
+            <span class="bb-outs-label">OUTS</span>
+          </div>
+        </div>
+
+        <div class="label">Runner on first · 1 out</div>
+        <div class="bb-situation">
+          <div class="bb-diamond">
+            <span class="bb-base second"></span><span class="bb-base third"></span><span class="bb-base first on"></span>
+          </div>
+          <div class="bb-outs">
+            <span class="bb-out on"></span><span class="bb-out"></span><span class="bb-out"></span>
+            <span class="bb-outs-label">OUT</span>
+          </div>
+        </div>
+
+        <div class="label">Bases loaded · 2 outs</div>
+        <div class="bb-situation lg">
+          <div class="bb-diamond">
+            <span class="bb-base second on"></span><span class="bb-base third on"></span><span class="bb-base first on"></span>
+          </div>
+          <div class="bb-outs">
+            <span class="bb-out on"></span><span class="bb-out on"></span><span class="bb-out"></span>
+            <span class="bb-outs-label">OUTS</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>
